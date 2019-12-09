@@ -1,0 +1,77 @@
+### Setup OKD on the remote machine ###
+---
+- name: Install Docker.
+  yum: 
+     name: docker 
+     state: latest
+
+- name: Add Docker as a service on the VM.
+  command: systemctl enable docker
+
+- name: Add DNS to resolv.conf  
+  template: 
+     src: /home/trujillo/sandbox/okd-ansible-setup/roles/files/resolv.conf
+     dest: /etc/resolv.conf
+
+- name: Make resolv.conf permanent.
+  command: chattr +i /etc/resolv.conf
+  
+- name: Add PEERDNS="no" to ifcfg-eth0 
+  template: 
+     src: /home/trujillo/sandbox/okd-ansible-setup/roles/files/ifcfg-eth0
+     dest: /etc/sysconfig/network-scripts/ifcfg-eth0
+
+- name: Configure the insecure registry for Docker.
+  template: 
+     src: /home/trujillo/sandbox/okd-ansible-setup/roles/files/daemon.json
+     dest: /etc/docker/daemon.json
+
+- name: Reload the Docker daemon. 
+  command: systemctl daemon-reload 
+
+- name: Start Docker as a service on the VM.
+  command: systemctl start docker
+
+- name: Enable firewalld.
+  command: systemctl enable firewalld
+
+- name: Start firewalld.
+  command: systemctl start firewalld
+
+- name: Step 1- Configure firewalld to allow ports to be used needed by the OpenShift cluster.
+  command: firewall-cmd --permanent --new-zone dockerc
+
+- name: Step 2- Configure firewalld to allow ports to be used needed by the OpenShift cluster.
+  command: firewall-cmd --permanent --zone dockerc --add-source 172.17.0.0/16
+
+- name: Step 3- Configure firewalld to allow ports to be used needed by the OpenShift cluster.
+  command: firewall-cmd --permanent --zone dockerc --add-port 8443/tcp
+
+- name: Step 4- Configure firewalld to allow ports to be used needed by the OpenShift cluster.
+  command: firewall-cmd --permanent --zone dockerc --add-port 53/udp
+
+- name: Step 5- Configure firewalld to allow ports to be used needed by the OpenShift cluster.
+  command: firewall-cmd --permanent --zone dockerc --add-port 8053/udp
+
+- name: Reload the firewall with the new configuration. 
+  command: firewall-cmd --reload 
+
+- name: Install OpenShift.
+  yum: 
+     name: centos-release-openshift-origin311
+ 
+- name: Install OC.
+  yum: 
+     name: origin-clients 
+
+- name: Install Git.
+  yum: 
+     name: git  
+     state: latest
+
+- name: Step 1- Configure Git.
+  command: git config --global user.name "Mark Trujillo"
+
+- name: Step 2- Configure Git.
+  command: git config --global user.email "mtrujill@redhat.com"
+

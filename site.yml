@@ -1,0 +1,7 @@
+# Playbook to configure a single instance of standalone EAP.
+- hosts: okdvms 
+  remote_user: mtrujillo  
+  become: yes
+
+  roles:
+    - roles 
