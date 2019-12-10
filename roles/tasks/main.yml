@@ -69,9 +69,36 @@
      name: git  
      state: latest
 
-- name: Step 1- Configure Git.
-  command: git config --global user.name "Mark Trujillo"
+- name: Download Maven
+  become: yes
+  become_user: mtrujillo 
+  get_url: 
+     url: http://apache.cs.utah.edu/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.zip
+     dest: /home/mtrujillo/Downloads
+     mode: '0755'
 
-- name: Step 2- Configure Git.
-  command: git config --global user.email "mtrujill@redhat.com"
+- name: Unzip Maven
+  become: yes
+  become_user: mtrujillo 
+  unarchive: 
+    src: /home/mtrujillo/Downloads/apache-maven-3.6.2-bin.zip
+    dest: /home/mtrujillo
+    remote_src: yes
+    mode: '0755'
+
+- name: Setup developer sandbox
+  become: yes
+  become_user: mtrujillo
+  file: 
+     path: /home/mtrujillo/sandbox/nodejs
+     state: directory 
+     mode: '0755'
+
+- name: Checkout code
+  become: yes
+  become_user: mtrujillo 
+  git:
+     repo: https://github.com/mtrujill/nodejs-ex.git 
+     dest: /home/mtrujillo/sandbox/nodejs
+
 
